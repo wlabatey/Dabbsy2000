@@ -2,10 +2,19 @@
 
 var irc = require('../');
 
-var bot = new irc.Client('irc.dollyfish.net.nz', 'nodebot', {
-    debug: true,
-    channels: ['#test', '#othertest']
-});
+var bot = new irc.Client('chat.freenode.net', 'Dabbsy2000',
+    {   
+        userName: 'Dabbsy2000',
+        realName: 'Chris Dabbs',
+        port: 6697,
+        showErrors: true,
+        autoRejoin: true,
+        autoConnect: true,
+        secure: true,
+        debug: true,
+        channels: ['#wangerz']
+    }
+);
 
 bot.addListener('error', function(message) {
     console.error('ERROR: %s: %s', message.command, message.args.join(' '));
@@ -39,7 +48,7 @@ bot.addListener('pm', function(nick, message) {
     console.log('Got private message from %s: %s', nick, message);
 });
 bot.addListener('join', function(channel, who) {
-    console.log('%s has joined %s', who, channel);
+    console.log(`Helloooooo ${who}!`);
 });
 bot.addListener('part', function(channel, who, reason) {
     console.log('%s has left %s: %s', who, channel, reason);
