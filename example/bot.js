@@ -29,8 +29,9 @@ bot.addListener('message', function(from, to, message) {
 
     if (to.match(/^[#&]/)) {
         // channel message
-        if (message.match(/hello/i)) {
-            bot.say(to, 'Hello there ' + from);
+        if (message.match(/hello/i) || message.match(/hi/i)) {
+            bot.say(to, `Hellooooo ${from}!`);
+            bot.say(to, `What's the ping rate onto that?`);
         }
         if (message.match(/dance/)) {
             setTimeout(function() { bot.say(to, '\u0001ACTION dances: :D\\-<\u0001'); }, 1000);
