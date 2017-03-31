@@ -22,7 +22,7 @@ TO DO:
 
 */
 
-const IRC = require('../');
+const IRC = require('../lib/irc.js');
 
 // Bot Config
 
@@ -163,6 +163,24 @@ BOT.addListener('message#wangerz', function(from, message) {
 BOT.addListener('message', function(from, to, message) {
     console.log(`${from} => ${to}: ${message}`);
 
+    // Message to channel that includes '!'
+    if (to.match(/^[#&]/) && message.match(/^[!&]/)) {
+
+
+        if (message === '!nuke') {
+            console.log(BOT.chans['#wangerz'].users);
+            BOT.say(to, 'Coming soon!!!');
+
+            // Returns object of nicks in current channel
+            // Next: convert to array of object properties (nicks) and then kick all 
+
+        }
+
+
+        // BOT.say(to, 'Sorry I don\'t recognise that command!');
+    }
+
+    // Message to channel that includes name
     if (to.match(/^[#&]/) && message.includes(DABBSY.name)) {
         console.log("Message to Dabbsy2000!");
         // channel message to bot
