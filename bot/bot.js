@@ -59,7 +59,7 @@ const PEOPLE = {
 const DABBSY = {
     name: 'Dabbsy2000',
     channel: '#wangerz',
-    commands: {
+    methods: {
         // Kick everybody else from channel
         nuke(from) {
 
@@ -69,6 +69,13 @@ const DABBSY = {
         op(from) {
 
         },
+        // Dance!!!
+        dance(channel) {
+                setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D\\-<\u0001'); }, 1000);
+                setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D|-<\u0001');  }, 2000);
+                setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D/-<\u0001');  }, 3000);
+                setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D|-<\u0001');  }, 4000);
+        }
     },
     responses: {
         greetings: [
@@ -92,11 +99,11 @@ const DABBSY = {
         ],
     },
     triggers: {
-        keywords: {
-            commands: ['!commands'],
-            help: ['!help'],
+        commands: {
+            help: ['!help', '!commands'],
             nuke: ['!nuke', '!fuck', '!shit'],
             op: ['!op'],
+            dance: ['!dance'],
         },
         greetings: [
             'Hello',
@@ -163,24 +170,36 @@ BOT.addListener('message#wangerz', function(from, message) {
 BOT.addListener('message', function(from, to, message) {
     console.log(`${from} => ${to}: ${message}`);
 
-    // Message to channel that includes '!'
+    // Message to channel that includes the command prefix '!'
     if (to.match(/^[#&]/) && message.match(/^[!&]/)) {
 
 
-        if (message === '!nuke') {
-            console.log(BOT.chans['#wangerz'].users);
-            BOT.say(to, 'Coming soon!!!');
+        if (DABBSY.triggers.commands.nuke.includes(message)) {
+            let channel_users = BOT.chans['#wangerz'].users;
+            let nicks_to_kick = [];
 
-            // Returns object of nicks in current channel
-            // Next: convert to array of object properties (nicks) and then kick all 
+            console.log(nicks_to_kick);
+            console.log(BOT.nick);
 
+            for (nick in channel_users) {
+                if (nick !== BOT.nick) {
+                    nicks_to_kick.push(nick);
+                }
+            }
+
+            nicks_to_kick.forEach((nick) => {
+                BOT.send('KICK', DABBSY.channel, nick, `NUKED BY ${from}`);
+            });
         }
 
+        if (DABBSY.triggers.commands.dance.includes(message)) {
+            DABBSY.methods.dance(to);
+        }
 
         // BOT.say(to, 'Sorry I don\'t recognise that command!');
     }
 
-    // Message to channel that includes name
+    // Message to channel that includes 'Dabbsy2000'
     if (to.match(/^[#&]/) && message.includes(DABBSY.name)) {
         console.log("Message to Dabbsy2000!");
         // channel message to bot
@@ -200,11 +219,7 @@ BOT.addListener('message', function(from, to, message) {
             return;
         }
         if (message.includes('dance')) {
-            setTimeout(function() { BOT.say(to, '\u0001ACTION dances: :D\\-<\u0001'); }, 1000);
-            setTimeout(function() { BOT.say(to, '\u0001ACTION dances: :D|-<\u0001');  }, 2000);
-            setTimeout(function() { BOT.say(to, '\u0001ACTION dances: :D/-<\u0001');  }, 3000);
-            setTimeout(function() { BOT.say(to, '\u0001ACTION dances: :D|-<\u0001');  }, 4000);
-            return;
+            Dabbsy.methods.dance(to);
         }
     }
     else {
