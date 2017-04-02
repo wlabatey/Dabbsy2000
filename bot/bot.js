@@ -65,10 +65,7 @@ const DABBSY = {
         nuke(from) {
             let channel_users = BOT.chans['#wangerz'].users;
             let nicks_to_kick = [];
-
-            console.log(nicks_to_kick);
-            console.log(BOT.nick);
-
+            
             for (nick in channel_users) {
                 if (nick !== BOT.nick) {
                     nicks_to_kick.push(nick);
@@ -184,7 +181,6 @@ function randomItemFromArray(responseArray) {
 // Returns random time in milliseconds between minimum and maximum amount in minutes
 function randomTimeBetween(min, max) {
     let time = Math.floor(Math.random()*(max-min+1)+min)*60*1000;;
-    console.log(time);
     return time;
 }
 
@@ -276,7 +272,6 @@ BOT.addListener('kick', function(channel, who, by, reason) {
 // Say random quote at a random interval between 15 and 60 minutes
 (function loop() {
     let rand = randomTimeBetween(30, 90);
-    console.log(rand);
     setTimeout(function() {
         BOT.say(DABBSY.channel, randomItemFromArray(DABBSY.responses.quotes));
         loop();      
