@@ -9,17 +9,15 @@ TO DO:
 
     Basic:
 
-        - Op command / auto Op (Think about best way to implement. Either use promises or refactor..)
-
         - Add / list / remove quotes
-        - Check auth & auto op authorised users (based on whois data and nickname)
         - Detect changes to github repositories and announce to channel
 
         - Greeting on join (done)
         - Detect technical terms and respond (done)
         - Nuke command (done)
         - Randomly timed messages (done)
-
+        - Op command / auto Op (done)
+        - Check auth & auto op authorised users (based on whois data and nickname) (done)
 */
 
 const IRC = require('../lib/irc.js');
@@ -35,7 +33,7 @@ const BOT = new IRC.Client('chat.freenode.net', 'Dabbsy2000',
         autoRejoin: true,
         autoConnect: true,
         secure: true,
-        debug: true,
+        debug: false,
         channels: ['#wangerz'],
     }
 );
@@ -84,11 +82,7 @@ const DABBSY = {
 
         // Give operator status
         op(nick) {
-                console.log(isAnAdmin(nick));
-                if (isAnAdmin(nick)) {
-                    console.log(isAnAdmin(nick));
-                    BOT.send('MODE', DABBSY.channel, '+o', nick);
-                } 
+            BOT.send('MODE', DABBSY.channel, '+o', nick);
         },
         // Dance!!!
         dance(channel) {
@@ -96,6 +90,9 @@ const DABBSY = {
                 setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D|-<\u0001');  }, 2000);
                 setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D/-<\u0001');  }, 3000);
                 setTimeout(function() { BOT.say(channel, '\u0001ACTION dances: :D|-<\u0001');  }, 4000);
+        },
+        voice(nick) {
+            BOT.send('MODE', DABBSY.channel, '+v', nick);
         }
     },
     responses: {
@@ -159,22 +156,25 @@ const DABBSY = {
             'developer',
             'dev',
         ],
-    }
-}
+    },
+};
 
 // --------------------------------------------------------------------------------------------------------------
 
 // --- Functions ---
 
-// Check user's whois data and/or nickname against admin list and return true or false
-
-
-// -----> This needs to be called using a promise 
-
-// https://developers.google.com/web/fundamentals/getting-started/primers/promises
+// Check user's whois account data against admin list and return true or false
 
 function isAnAdmin(nick) {
-    let info = BOT.whois(nick, (info) => PEOPLE.admins.includes(info.account));
+    return new Promise((resolve, reject) => {
+        let info = BOT.whois(nick, (info) => {
+            if (PEOPLE.admins.includes(info.account)) {
+                resolve(true);
+            } else {
+                reject(`${nick} is not authorised to be an operator`);
+            }
+        });
+    });
 }
 
 function randomItemFromArray(responseArray) {
@@ -224,7 +224,6 @@ BOT.addListener('message', function(from, to, message) {
 
     // Message to channel that includes 'Dabbsy2000'
     if (to.match(/^[#&]/) && message.includes(DABBSY.name)) {
-
         if (searchArrayForString(message, DABBSY.triggers.greetings)) { 
             BOT.say(to, `Hellooo ${from}!`);
             return;
@@ -233,7 +232,6 @@ BOT.addListener('message', function(from, to, message) {
 
     // Message to channel
     if (to.match(/^[#&]/)) {
-
         // Message to channel contains item from technical terms array, randomised to occur 2/5 of the time
         if (searchArrayForString(message, DABBSY.triggers.technicalTerms) && Math.random() > 0.6) {
             BOT.say(to, randomItemFromArray(DABBSY.responses.error));
@@ -246,7 +244,11 @@ BOT.addListener('pm', function(nick, message) {
     console.log(`Got private message from ${nick}: ${message}`);
 
     if (DABBSY.triggers.commands.op.includes(message)) {
-        DABBSY.methods.op(nick);
+        isAnAdmin(nick).then(() => {
+            DABBSY.methods.op(nick);
+        }).catch(() => {
+            BOT.say(nick, "You are not authorised to be a channel operator!");
+        });
     }
 });
 
@@ -255,7 +257,11 @@ BOT.addListener('join', function(channel, who) {
         BOT.say(channel, `Helloooo! Sorry I'm late ${randomItemFromArray(DABBSY.responses.excuses)}`);
     } else {
         BOT.say(channel, `Helloooooo ${who}!`);
-        DABBSY.methods.op(who);
+        isAnAdmin(who).then(() => {
+            DABBSY.methods.op(who);
+        }).catch(() => {
+            DABBSY.methods.voice(who);
+        });
     }
 });
 
@@ -269,7 +275,7 @@ BOT.addListener('kick', function(channel, who, by, reason) {
 
 // Say random quote at a random interval between 15 and 60 minutes
 (function loop() {
-    let rand = randomTimeBetween(15, 60);
+    let rand = randomTimeBetween(30, 90);
     console.log(rand);
     setTimeout(function() {
         BOT.say(DABBSY.channel, randomItemFromArray(DABBSY.responses.quotes));
