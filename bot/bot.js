@@ -208,7 +208,7 @@ BOT.addListener('message', function(from, to, message) {
     if (to.match(/^[#&]/) && message.match(/^[!&]/)) {
 
         if (DABBSY.triggers.commands.nuke.includes(message)) {
-            DABBSY.methods.nuke(to);
+            DABBSY.methods.nuke(from);
             return;
         }
 
