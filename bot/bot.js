@@ -25,7 +25,7 @@ const IRC = require('../lib/irc.js');
 // Bot Config
 
 const BOT = new IRC.Client('chat.freenode.net', 'Dabbsy2000',
-    {   
+    {
         userName: 'Dabbsy2000',
         realName: 'Chris Dabbs',
         port: 6697,
@@ -65,7 +65,7 @@ const DABBSY = {
         nuke(from) {
             let channel_users = BOT.chans['#wangerz'].users;
             let nicks_to_kick = [];
-            
+
             for (nick in channel_users) {
                 if (nick !== BOT.nick) {
                     nicks_to_kick.push(nick);
@@ -76,7 +76,9 @@ const DABBSY = {
                 BOT.send('KICK', DABBSY.channel, nick, `NUKED BY ${from}`);
             });
         },
-
+        quote() {
+            BOT.say(DABBSY.channel, randomItemFromArray(DABBSY.responses.quotes));
+        },
         // Give operator status
         op(nick) {
             BOT.send('MODE', DABBSY.channel, '+o', nick);
@@ -105,7 +107,7 @@ const DABBSY = {
             'Are we using Akamai or Cloudfront?',
             'I know the guys at Facebook... they\'re a really good bunch.',
             'Let me know if you want to take another peek at that code.',
-            'Dev dev dev dev dev!', 
+            'Dev dev dev dev dev!',
         ],
         error: [
             'Okay, I\'ll leave you guys to get on with that.',
@@ -120,6 +122,7 @@ const DABBSY = {
             nuke: ['!nuke', '!fuck', '!shit'],
             op: ['!op'],
             dance: ['!dance'],
+            quote: ['!quote'],
         },
         greetings: [
             'hello',
@@ -184,11 +187,11 @@ function randomTimeBetween(min, max) {
     return time;
 }
 
-// Splits a string into an array containing each word and then checks 
+// Splits a string into an array containing each word and then checks
 // if any element of that array matches any element of another array
 function searchArrayForString(string, array) {
     let stringArr = string.split(' ');
-    return stringArr.some((item) => array.includes(item.toLowerCase())); 
+    return stringArr.some((item) => array.includes(item.toLowerCase()));
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -216,11 +219,16 @@ BOT.addListener('message', function(from, to, message) {
             DABBSY.methods.dance(to);
             return;
         }
+
+        if (DABBSY.triggers.commands.quote.includes(message)) {
+            DABBSY.methods.quote();
+            return;
+        }
     }
 
     // Message to channel that includes 'Dabbsy2000'
     if (to.match(/^[#&]/) && message.includes(DABBSY.name)) {
-        if (searchArrayForString(message, DABBSY.triggers.greetings)) { 
+        if (searchArrayForString(message, DABBSY.triggers.greetings)) {
             BOT.say(to, `Hellooo ${from}!`);
             return;
         }
@@ -274,6 +282,6 @@ BOT.addListener('kick', function(channel, who, by, reason) {
     let rand = randomTimeBetween(30, 90);
     setTimeout(function() {
         BOT.say(DABBSY.channel, randomItemFromArray(DABBSY.responses.quotes));
-        loop();      
+        loop();
     }, rand);
 })();
